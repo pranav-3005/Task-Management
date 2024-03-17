@@ -1,5 +1,7 @@
 Project description:
 
+    Techs used => Java, SpringBoot, MySQL, JPA/Hibernate, REST APIs, Spring Security
+
  This project features the Task management application.
  I've structured this Project code in MVC architectural layout, used MySQL DB for local database,
  connected using JDBC and handled using JPA/Hibernate ORM.
