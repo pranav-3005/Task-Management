@@ -10,16 +10,20 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/task")
 public class TaskController {
 
+    //Contains APIs related to tasks
+
     @Autowired
     Service service;
 
+    //------------------------------------[POST]
     @PostMapping("/addTask")
     public ResponseEntity addTask(@RequestBody TaskRequest taskRequest)
     {
         return service.addTask(taskRequest);
     }
 
-    //----------------------------------
+
+    //----------------------------------[GET]
 
     @GetMapping("/getTask")
     public ResponseEntity getTask(@RequestParam int taskId)
@@ -51,7 +55,8 @@ public class TaskController {
         return service.getTasksByTitleDescending();
     }
 
-    //------------------------------------
+
+    //------------------------------------[PUT]
 
     @PutMapping("/updateTaskStatus")
     public ResponseEntity updateTaskStatus(@RequestParam int taskId,@RequestBody String newStatus)
@@ -77,12 +82,14 @@ public class TaskController {
         return service.updateTitle(taskId,newTitle);
     }
 
-    //--------------------------------------------
+    //--------------------------------------------[DELETE]
 
     @DeleteMapping("/deleteTask")
     public ResponseEntity deleteTask(@RequestParam int taskId)
     {
         return service.deleteTask(taskId);
     }
+
+    //--------------------------------------------------
 
 }

@@ -28,11 +28,10 @@ public class Service {
     @Autowired
     UserRepository userRepository;
 
-    User currentUser;
+    User currentUser; //to store current session's user
 
-
-
-
+    //--------------------------------------------
+    //account related functions
     public ResponseEntity addUser(String userName, String password) {
 
         //1.exceptional handling
@@ -57,6 +56,8 @@ public class Service {
 
     public ResponseEntity enableAdmin() {
 
+        //1 admin account only
+
         Optional<User> temp = Optional.ofNullable(userRepository.findByUserName("admin"));
         if(temp.isEmpty())
         {
@@ -76,7 +77,7 @@ public class Service {
         return new ResponseEntity<>("Admin account is already enabled.\n(Check the project document for admin credentials)",HttpStatus.FORBIDDEN);
     }
 
-    //-------------------------------------------
+    //-------------------------------------------[POST]
 
     public ResponseEntity addTask(TaskRequest taskRequest) {
 
@@ -98,112 +99,14 @@ public class Service {
         return new ResponseEntity<>("Task added successfully !!!", HttpStatus.CREATED);
     }
 
-    //------------------------------------------
-
-    public ResponseEntity updateTaskStatus(int taskId, String newStatus) {
-
-        //1. acquiring current user details
-        currentUser= CustomUserDetailsService.getCurrentUser();
-
-        //2.exceptional handling
-        Optional<Task> temp = currentUser.getRole().equals("ROLE_ADMIN") ? taskRepository.findById(taskId) : Optional.ofNullable(taskRepository.findByIdAndUserId(taskId, currentUser.getId()));
-
-        if(temp.isEmpty())
-            return new ResponseEntity<>("Task is not present !!!",HttpStatus.NOT_FOUND);
-
-        Task task=temp.get();
-
-        if(task.getStatus().toString().equals(newStatus))
-            return new ResponseEntity<>("The given state is same as current state of the task.",HttpStatus.NOT_ACCEPTABLE);
-
-
-        //3.logic
-        task.setStatus(Status.valueOf(newStatus));
-        taskRepository.save(task);
-
-        //4.Response
-        return new ResponseEntity<>("Status updated suiccessfully",HttpStatus.ACCEPTED);
-    }
-
-    public ResponseEntity updateDescription(int taskId, String description) {
-
-        //1. acquiring current user details
-        currentUser= CustomUserDetailsService.getCurrentUser();
-
-        //2.exceptional handling
-        Optional<Task> temp = currentUser.getRole().equals("ROLE_ADMIN") ? taskRepository.findById(taskId) : Optional.ofNullable(taskRepository.findByIdAndUserId(taskId, currentUser.getId()));
-
-        if(temp.isEmpty())
-            return new ResponseEntity<>("Task is not present !!!",HttpStatus.NOT_FOUND);
-
-        Task task=temp.get();
-
-        if(task.getDescription().equals(description))
-            return new ResponseEntity<>("The given description is same as current description of the task.",HttpStatus.NOT_ACCEPTABLE);
-
-
-        //3.logic
-        task.setDescription(description);
-
-        taskRepository.save(task);
-
-        //4.Response
-        return new ResponseEntity<>("Description updated successfully.",HttpStatus.ACCEPTED);
-
-    }
-
-    public ResponseEntity updateDueDate(int taskId, String newDate) {
-
-        //1. acquiring current user details
-        currentUser= CustomUserDetailsService.getCurrentUser();
-
-        //2.exceptional handling
-        Optional<Task> temp = currentUser.getRole().equals("ROLE_ADMIN") ? taskRepository.findById(taskId) : Optional.ofNullable(taskRepository.findByIdAndUserId(taskId, currentUser.getId()));
-
-        if(temp.isEmpty())
-            return new ResponseEntity<>("Task is not present !!!",HttpStatus.NOT_FOUND);
-
-        Task task=temp.get();
-
-        if(task.getDueDate().equals(newDate))
-            return new ResponseEntity<>("The given date is same as current due-date of the task.",HttpStatus.NOT_ACCEPTABLE);
-
-
-        //3.logic
-        task.setDueDate(newDate);
-        taskRepository.save(task);
-
-        //4.Response
-        return new ResponseEntity<>("Due-Date update successfully",HttpStatus.ACCEPTED);
-    }
-
-    public ResponseEntity updateTitle(int taskId, String newTitle) {
-        //1. acquiring current user details
-        currentUser= CustomUserDetailsService.getCurrentUser();
-
-        //2.exceptional handling
-        Optional<Task> temp = currentUser.getRole().equals("ROLE_ADMIN") ? taskRepository.findById(taskId) : Optional.ofNullable(taskRepository.findByIdAndUserId(taskId, currentUser.getId()));
-
-        if(temp.isEmpty())
-            return new ResponseEntity<>("Task is not present !!!",HttpStatus.NOT_FOUND);
-
-        //3.update & save
-        Task task=temp.get();
-        task.setTitle(newTitle);
-        taskRepository.save(task);
-
-        //4.Response
-        return new ResponseEntity("Title updated successfully !!!",HttpStatus.ACCEPTED);
-    }
-
-    //----------------------------------------------
+    //------------------------------------------[GET]
 
     public ResponseEntity getTask(int taskId) {
 
         //1. acquiring current user details
         currentUser= CustomUserDetailsService.getCurrentUser();
 
-        //2.exceptional handling
+        //2.exceptional handling & check for admin user
         Optional<Task> temp = currentUser.getRole().equals("ROLE_ADMIN") ? taskRepository.findById(taskId) : Optional.ofNullable(taskRepository.findByIdAndUserId(taskId, currentUser.getId()));
 
         if(temp.isEmpty())
@@ -224,7 +127,7 @@ public class Service {
         //1. acquiring current user details
         currentUser= CustomUserDetailsService.getCurrentUser();
 
-        //2.exceptional handling
+        //2.exceptional handling  & check for admin user
         List<Task> taskList= currentUser.getRole().equals("ROLE_ADMIN") ? taskRepository.findAll() : taskRepository.findByUserId(currentUser.getId());
 
         if(taskList.isEmpty())
@@ -247,7 +150,7 @@ public class Service {
         //1. acquiring current user details
         currentUser= CustomUserDetailsService.getCurrentUser();
 
-        //2. filter & task -> taskResponse
+        //2. filter & task -> taskResponse  & check for admin user
         List<Task> taskList=(currentUser.getRole().equals("ROLE_ADMIN")) ? taskRepository.findAll() : taskRepository.findByUserId(currentUser.getId());
 
         List<TaskResponse> taskResponseList=new ArrayList<>();
@@ -276,7 +179,7 @@ public class Service {
         if(taskList.isEmpty())
             return new ResponseEntity<>("No task present !!!",HttpStatus.NOT_FOUND);
 
-        //3. task -> taskResponse
+        //3. task -> taskResponse  & check for admin user
 
         List<TaskResponse> taskResponseList=new ArrayList<>();
 
@@ -307,10 +210,8 @@ public class Service {
         if(taskList.isEmpty())
             return new ResponseEntity<>("No task present !!!",HttpStatus.NOT_FOUND);
 
-        //3. task -> taskResponse
-
+        //3. task -> taskResponse  & check for admin user
         List<TaskResponse> taskResponseList=new ArrayList<>();
-
 
         for (int i=taskList.size()-1;i>=0;i--)
         {
@@ -326,20 +227,118 @@ public class Service {
         return new ResponseEntity<>(taskResponseList,HttpStatus.FOUND);
     }
 
-    //---------------------------------------------
+    //--------------------------------------------- [PUT]
 
-    public ResponseEntity deleteTask(int taskid) {
+    public ResponseEntity updateTaskStatus(int taskId, String newStatus) {
+
+        //1. acquiring current user details
+        currentUser= CustomUserDetailsService.getCurrentUser();
+
+        //2.exceptional handling & check for admin user
+        Optional<Task> temp = currentUser.getRole().equals("ROLE_ADMIN") ? taskRepository.findById(taskId) : Optional.ofNullable(taskRepository.findByIdAndUserId(taskId, currentUser.getId()));
+
+        if(temp.isEmpty())
+            return new ResponseEntity<>("Task is not present !!!",HttpStatus.NOT_FOUND);
+
+        Task task=temp.get();
+
+        if(task.getStatus().toString().equals(newStatus))
+            return new ResponseEntity<>("The given state is same as current state of the task.",HttpStatus.NOT_ACCEPTABLE);
+
+
+        //3.logic
+        task.setStatus(Status.valueOf(newStatus));
+        taskRepository.save(task);
+
+        //4.Response
+        return new ResponseEntity<>("Status updated successfully",HttpStatus.ACCEPTED);
+    }
+
+    public ResponseEntity updateDescription(int taskId, String description) {
+
+        //1. acquiring current user details
+        currentUser= CustomUserDetailsService.getCurrentUser();
+
+        //2.exceptional handling  & check for admin user
+        Optional<Task> temp = currentUser.getRole().equals("ROLE_ADMIN") ? taskRepository.findById(taskId) : Optional.ofNullable(taskRepository.findByIdAndUserId(taskId, currentUser.getId()));
+
+        if(temp.isEmpty())
+            return new ResponseEntity<>("Task is not present !!!",HttpStatus.NOT_FOUND);
+
+        Task task=temp.get();
+
+        if(task.getDescription().equals(description))
+            return new ResponseEntity<>("The given description is same as current description of the task.",HttpStatus.NOT_ACCEPTABLE);
+
+
+        //3.logic
+        task.setDescription(description);
+
+        taskRepository.save(task);
+
+        //4.Response
+        return new ResponseEntity<>("Description updated successfully.",HttpStatus.ACCEPTED);
+    }
+
+    public ResponseEntity updateDueDate(int taskId, String newDate) {
+
+        //1. acquiring current user details
+        currentUser= CustomUserDetailsService.getCurrentUser();
+
+        //2.exceptional handling  & check for admin user
+        Optional<Task> temp = currentUser.getRole().equals("ROLE_ADMIN") ? taskRepository.findById(taskId) : Optional.ofNullable(taskRepository.findByIdAndUserId(taskId, currentUser.getId()));
+
+        if(temp.isEmpty())
+            return new ResponseEntity<>("Task is not present !!!",HttpStatus.NOT_FOUND);
+
+        Task task=temp.get();
+
+        if(task.getDueDate().equals(newDate))
+            return new ResponseEntity<>("The given date is same as current due-date of the task.",HttpStatus.NOT_ACCEPTABLE);
+
+
+        //3.logic
+        task.setDueDate(newDate);
+        taskRepository.save(task);
+
+        //4.Response
+        return new ResponseEntity<>("Due-Date update successfully",HttpStatus.ACCEPTED);
+    }
+
+    public ResponseEntity updateTitle(int taskId, String newTitle) {
+
+        //1. acquiring current user details
+        currentUser= CustomUserDetailsService.getCurrentUser();
+
+        //2.exceptional handling & check for admin user
+        Optional<Task> temp = currentUser.getRole().equals("ROLE_ADMIN") ? taskRepository.findById(taskId) : Optional.ofNullable(taskRepository.findByIdAndUserId(taskId, currentUser.getId()));
+
+        if(temp.isEmpty())
+            return new ResponseEntity<>("Task is not present !!!",HttpStatus.NOT_FOUND);
+
+        //3.update & save
+        Task task=temp.get();
+        task.setTitle(newTitle);
+        taskRepository.save(task);
+
+        //4.Response
+        return new ResponseEntity("Title updated successfully !!!",HttpStatus.ACCEPTED);
+    }
+
+
+    //--------------------------------------------------[DELETE]
+
+    public ResponseEntity deleteTask(int taskId) {
 
         //1. acquiring current user details
         currentUser= CustomUserDetailsService.getCurrentUser();
 
 
-        //2.exceptional handling
-        Optional<Task> temp = Optional.ofNullable(taskRepository.findByIdAndUserId(taskid, currentUser.getId()));
+        //2.exceptional handling & check for admin user
+        Optional<Task> temp = currentUser.getRole().equals("ROLE_ADMIN") ? taskRepository.findById(taskId) :  Optional.ofNullable(taskRepository.findByIdAndUserId(taskId, currentUser.getId()));
 
-        if( !(taskRepository.existsById(taskid) && currentUser.getRole().equals("ROLE_ADMIN") ) )
-            if(temp.isEmpty())
-                return new ResponseEntity<>("Task is not present !!!",HttpStatus.NOT_FOUND);
+        if(temp.isEmpty())
+            return new ResponseEntity<>("Task is not present !!!",HttpStatus.NOT_FOUND);
 
 
         //3.logic

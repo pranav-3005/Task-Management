@@ -2,14 +2,22 @@ Project description:
 
     Techs used => Java, SpringBoot, MySQL, JPA/Hibernate, REST APIs, Spring Security
 
- This project features the Task management application.
- I've structured this Project code in MVC architectural layout, used MySQL DB for local database,
- connected using JDBC and handled using JPA/Hibernate ORM.
- Created model classes and its relevant repository interfaces to connect and work with the Relational-tables in DB.
- Whereas, controller layer acts as the endpoint and contains list of APIs, Service layer provides the business logics to those endpoints in controller layer.
- Utilized useful dependencies to improve project's functionality and performance like.., Lombok,Swagger..etc.
- Implemented functionalities like DTO(request & response classes for model classes) and Transformers (contains functions : DTO->model,model->DTO) and finally
- Implemented user-based authentication using Spring security.
+ ->This project features the Task management application.
+
+ ->I've structured this Project code in MVC architectural layout, used MySQL DB for local database,
+
+ ->connected DB using JDBC and handled using JPA/Hibernate ORM.
+
+ ->Created model classes and its relevant repository interfaces to connect and work with the Relational-tables in DB.
+
+ ->Whereas, controller layer acts as the endpoint and contains list of APIs, Service layer provides the business logics to those endpoints in controller layer.
+
+ ->Utilized useful dependencies to improve project's functionality and performance like.., Lombok,Swagger..etc.
+
+ ->Implemented functionalities like DTO(request & response classes for model classes) and Transformers (contains functions : DTO->model,model->DTO) and finally
+
+ ->Implemented user-based authentication using Spring security.
+
 
  ***  Admin credentials ( userName = admin , password = admin )   ***
 

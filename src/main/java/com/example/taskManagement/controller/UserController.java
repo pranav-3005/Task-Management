@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/user")
 public class UserController {
 
+    //Contains APIs related to user
+
     @Autowired
     Service service;
 
